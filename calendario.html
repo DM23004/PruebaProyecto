@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas - Calendario</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar-container"></aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <h1>Calendario Mensual</h1>
+                <p>Planifica tus actividades y mantén el control de tu tiempo.</p>
+            </div>
+            <div class="user-info">
+                <span id="api-location"><i class="fas fa-map-marker-alt"></i> Obteniendo ubicación...</span>
+                <button class="btn-primary" id="btn-open-modal"><i class="fas fa-plus"></i> Nueva Tarea</button>
+            </div>
+        </header>
+
+        <section class="calendar-container">
+            <div class="calendar-header-controls">
+                <button><i class="fas fa-chevron-left"></i> Anterior</button>
+                <h2>Mayo 2026</h2>
+                <button>Siguiente <i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="calendar-day-name">Dom</div>
+                <div class="calendar-day-name">Lun</div>
+                <div class="calendar-day-name">Mar</div>
+                <div class="calendar-day-name">Mié</div>
+                <div class="calendar-day-name">Jue</div>
+                <div class="calendar-day-name">Vie</div>
+                <div class="calendar-day-name">Sáb</div>
+
+                <div class="calendar-day" style="background-color: #fcfcfc; border-color: transparent;"></div>
+                <div class="calendar-day" style="background-color: #fcfcfc; border-color: transparent;"></div>
+                <div class="calendar-day" style="background-color: #fcfcfc; border-color: transparent;"></div>
+                <div class="calendar-day" style="background-color: #fcfcfc; border-color: transparent;"></div>
+                <div class="calendar-day" style="background-color: #fcfcfc; border-color: transparent;"></div>
+
+                <div class="calendar-day"><span class="day-number">1</span></div>
+                <div class="calendar-day"><span class="day-number">2</span></div>
+                <div class="calendar-day">
+                    <span class="day-number">3</span>
+                    <div class="cal-task completed"><i class="fas fa-check"></i> Diseño UI</div>
+                </div>
+                <div class="calendar-day"><span class="day-number">4</span></div>
+                <div class="calendar-day">
+                    <span class="day-number" style="color: var(--primary-color); background: rgba(67, 97, 238, 0.1); padding: 2px 8px; border-radius: 10px;">5</span>
+                    <div class="cal-task"><i class="fas fa-circle-notch"></i> Entrega de Fase 1</div>
+                    <div class="cal-task"><i class="fas fa-circle-notch"></i> Reunión Grupo 1</div>
+                </div>
+                <div class="calendar-day"><span class="day-number">6</span></div>
+                <div class="calendar-day"><span class="day-number">7</span></div>
+                <div class="calendar-day"><span class="day-number">8</span></div>
+                <div class="calendar-day"><span class="day-number">9</span></div>
+                <div class="calendar-day"><span class="day-number">10</span></div>
+                <div class="calendar-day">
+                    <span class="day-number">11</span>
+                    <div class="cal-task completed"><i class="fas fa-check"></i> Subir a GitHub</div>
+                </div>
+                <div class="calendar-day"><span class="day-number">12</span></div>
+                <div class="calendar-day"><span class="day-number">13</span></div>
+                <div class="calendar-day">
+                    <span class="day-number">14</span>
+                    <div class="cal-task" style="background-color: rgba(231, 76, 60, 0.1); color: var(--danger);"><i class="fas fa-exclamation-circle"></i> Entrega Final Proyecto</div>
+                </div>
+                <div class="calendar-day"><span class="day-number">15</span></div>
+                <div class="calendar-day"><span class="day-number">16</span></div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <h2 id="modal-title" style="margin-bottom: 20px;">Agregar Nueva Tarea</h2>
+            <form id="task-form">
+                <input type="hidden" id="task-id">
+                <div class="form-group"><label>Título</label><input type="text" id="task-title" required></div>
+                <div class="form-group"><label>Descripción</label><textarea id="task-desc" rows="3" required></textarea></div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="task-status"><option value="pending">Pendiente</option><option value="completed">Completada</option></select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" id="btn-close-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/crud.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

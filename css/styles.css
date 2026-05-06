@@ -4,15 +4,15 @@
 :root {
     --primary-color: #4361ee;
     --primary-hover: #3a53d0;
-    --sidebar-bg: #1e1e2f; /* Un tono oscuro más elegante */
-    --bg-color: #f4f6f9; /* Fondo general más suave */
+    --sidebar-bg: #1e1e2f; 
+    --bg-color: #f4f6f9; 
     --text-dark: #2d3142;
     --text-light: #8d99ae;
-    --success: #10b981; /* Verde más moderno (Tailwind) */
-    --warning: #f59e0b; /* Amarillo/naranja más legible */
-    --danger: #ef4444; /* Rojo vibrante */
+    --success: #10b981; 
+    --warning: #f59e0b; 
+    --danger: #ef4444; 
     --white: #ffffff;
-    --border-radius: 12px; /* Curvas más amigables */
+    --border-radius: 12px; 
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
     --shadow-md: 0 8px 16px rgba(0,0,0,0.06);
     --shadow-hover: 0 12px 24px rgba(67, 97, 238, 0.15);
@@ -137,43 +137,67 @@ body {
    ========================================= */
 .welcome-hero {
     background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
-    color: white;
-    padding: 40px;
     border-radius: var(--border-radius);
-    margin-bottom: 35px;
+    /* Padding más pequeño en móviles (15px) y hasta 40px en PC */
+    padding: clamp(15px, 4vw, 40px); 
+    margin-bottom: 40px;     
     box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
+    z-index: 1; 
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px; 
+    
+    /* LA CLAVE: Forzar a la caja a crecer verticalmente si el texto lo necesita */
+    height: auto; 
+    min-height: fit-content; 
+    box-sizing: border-box; 
+    width: 100%;
 }
-/* Efecto decorativo en el Hero */
+
+/* Efecto de círculo de fondo */
 .welcome-hero::after {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 300px;
-    height: 300px;
-    background: rgba(255,255,255,0.1);
+    top: -20%; 
+    right: -5%;
+    width: clamp(150px, 30vw, 350px); 
+    height: clamp(150px, 30vw, 350px);
+    background: rgba(255, 255, 255, 0.08); 
     border-radius: 50%;
-    z-index: 0; /* Lo mandamos al fondo de la pila */
+    z-index: -1; 
+    pointer-events: none; 
 }
 
-.welcome-hero h1, 
-.welcome-hero p { 
-    position: relative; 
-    z-index: 10; /* Aumentamos el z-index */
-    color: #ffffff; /* Forzamos el color blanco para evitar conflictos */
+.welcome-hero h1 { 
+    margin: 0; 
+    /* Reducimos drásticamente el tamaño mínimo a 1.2rem para móviles/zoom */
+    font-size: clamp(1.2rem, 5vw, 2.2rem); 
+    font-weight: 800; 
+    color: #ffffff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); 
+    letter-spacing: -0.5px; 
+    line-height: 1.2; 
+    word-wrap: break-word; /* Evita que palabras muy largas rompan el diseño */
 }
 
-.welcome-hero p { 
-    opacity: 0.9; 
-    font-size: 1.1rem; 
-    max-width: 700px; 
+/* Estilos para el texto descriptivo */
+.welcome-hero h2 { 
+    margin: 0;
+    /* Reducimos el tamaño mínimo a 0.85rem para que no invada toda la pantalla */
+    font-size: clamp(0.85rem, 3vw, 1.1rem); 
+    max-width: 100%; /* Permitimos que use el ancho disponible en móvil */
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.9); 
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); 
 }
 
 .dashboard-cards { 
     display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
     gap: 25px; 
     margin-bottom: 40px; 
 }
@@ -214,7 +238,7 @@ body {
     flex-wrap: wrap;
     gap: 15px;
 }
-.crud-controls { display: flex; gap: 15px; flex-wrap: wrap;}
+.crud-controls { display: flex; gap: 15px; flex-wrap: wrap; width: 100%; justify-content: flex-end;}
 .crud-controls input, .crud-controls select { 
     padding: 10px 15px; 
     border: 1px solid #e2e8f0; 
@@ -223,6 +247,8 @@ body {
     font-size: 14px;
     transition: all 0.3s ease;
     background-color: #f8fafc;
+    flex: 1; /* Permite que se adapten mejor */
+    min-width: 150px;
 }
 .crud-controls input:focus, .crud-controls select:focus {
     border-color: var(--primary-color);
@@ -233,12 +259,14 @@ body {
 /* Estilos de Tabla Mejorados */
 .table-responsive {
     width: 100%;
-    overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; /* Scroll suave en móviles */
 }
 table { 
     width: 100%; 
     border-collapse: separate; 
     border-spacing: 0;
+    min-width: 600px; /* Evita que la tabla colapse demasiado */
 }
 th, td { 
     text-align: left; 
@@ -253,7 +281,6 @@ th {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-/* Redondear esquinas del encabezado de la tabla */
 th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
 th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
 
@@ -294,7 +321,7 @@ tbody tr:hover { background-color: #f8fafc; }
     position: fixed; 
     top: 0; left: 0; width: 100%; height: 100%; 
     background-color: rgba(15, 23, 42, 0.6); 
-    backdrop-filter: blur(4px); /* Efecto vidrio */
+    backdrop-filter: blur(4px); 
     align-items: center; 
     justify-content: center; 
     z-index: 1000; 
@@ -303,7 +330,7 @@ tbody tr:hover { background-color: #f8fafc; }
     background-color: var(--white); 
     padding: 35px; 
     border-radius: 16px; 
-    width: 100%;
+    width: 90%;
     max-width: 450px; 
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
     transform: translateY(-20px);
@@ -345,7 +372,7 @@ tbody tr:hover { background-color: #f8fafc; }
    ========================================= */
 .features-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 25px;
     margin-bottom: 40px;
 }
@@ -416,8 +443,10 @@ tbody tr:hover { background-color: #f8fafc; }
     justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
-.calendar-header-controls h2 { color: var(--text-dark); font-size: 1.4rem; }
+.calendar-header-controls h2 { color: var(--text-dark); font-size: 1.4rem; text-align: center; }
 .calendar-header-controls button {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -436,7 +465,7 @@ tbody tr:hover { background-color: #f8fafc; }
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 12px;
+    gap: 10px;
 }
 .calendar-day-name {
     text-align: center;
@@ -450,24 +479,24 @@ tbody tr:hover { background-color: #f8fafc; }
 .calendar-day {
     border: 1px solid #f1f5f9;
     border-radius: 10px;
-    min-height: 120px;
-    padding: 12px;
+    min-height: 100px;
+    padding: 10px;
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     background: white;
 }
 .calendar-day:hover {
     border-color: rgba(67, 97, 238, 0.3);
     box-shadow: 0 4px 12px rgba(67, 97, 238, 0.08);
 }
-.day-number { font-weight: 700; color: var(--text-dark); align-self: flex-end; font-size: 1rem;}
+.day-number { font-weight: 700; color: var(--text-dark); align-self: flex-end; font-size: 0.9rem;}
 .cal-task {
     background-color: rgba(67, 97, 238, 0.1);
     color: var(--primary-color);
-    font-size: 0.75rem;
-    padding: 6px 10px;
+    font-size: 0.7rem;
+    padding: 5px 8px;
     border-radius: 6px;
     font-weight: 600;
     white-space: nowrap;
@@ -479,3 +508,147 @@ tbody tr:hover { background-color: #f8fafc; }
 .cal-task:hover { background-color: rgba(67, 97, 238, 0.2); }
 .cal-task.completed { background-color: rgba(16, 185, 129, 0.1); color: var(--success); }
 .cal-task.completed:hover { background-color: rgba(16, 185, 129, 0.2); }
+
+
+/* =========================================
+   DISEÑO RESPONSIVO (MÓVILES Y TABLETS)
+   ========================================= */
+
+@media (max-width: 900px) {
+    /* Cambiar el layout global para que el menú vaya arriba */
+    body {
+        flex-direction: column;
+    }
+
+    /* Ajustes del Panel Lateral (Sidebar) para móviles */
+    .sidebar {
+        width: 100%;
+        background: var(--sidebar-bg);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar-header {
+        padding: 15px;
+        border-bottom: none;
+    }
+    
+    .sidebar-header h2 {
+        font-size: 1.3rem;
+    }
+
+    /* Convertir el menú vertical en horizontal deslizable */
+    .sidebar-menu {
+        display: flex;
+        flex-direction: row;
+        padding: 0 15px 15px 15px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ocultar la barra de scroll visual para un look limpio */
+    .sidebar-menu::-webkit-scrollbar { display: none; }
+    .sidebar-menu { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .sidebar-menu li {
+        flex: 0 0 auto; /* Evita que los botones se encojan */
+        margin: 0 5px;
+        padding: 10px 15px;
+    }
+
+    /* Ajustes del contenido principal */
+    .main-content {
+        padding: 20px 15px;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .user-info {
+        width: 100%;
+        justify-content: space-between;
+        flex-direction: row-reverse; /* Pone el botón de "+ Tarea" a la derecha */
+    }
+
+    .welcome-hero {
+        padding: 25px;
+    }
+    
+    .welcome-hero h1 {
+        font-size: 1.7rem;
+    }
+
+    .dashboard-cards {
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+    }
+
+    /* Ajustes para el CRUD y Tablas */
+    .crud-container {
+        padding: 20px;
+    }
+
+    .crud-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .crud-controls {
+        flex-direction: column;
+    }
+
+    .crud-controls input, .crud-controls select {
+        width: 100%;
+    }
+
+    /* Ajustes del Calendario para que quepa en móvil */
+    .calendar-container {
+        padding: 15px;
+    }
+
+    .calendar-header-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .calendar-header-controls button {
+        width: 100%;
+    }
+    
+    .calendar-grid {
+        gap: 5px; /* Menos espacio entre días */
+    }
+
+    .calendar-day-name {
+        font-size: 0.7rem;
+        padding: 10px 0;
+    }
+
+    .calendar-day {
+        min-height: 70px;
+        padding: 5px;
+        border-radius: 6px;
+    }
+
+    .day-number {
+        font-size: 0.8rem;
+    }
+
+    .cal-task {
+        font-size: 0.6rem;
+        padding: 3px 5px;
+    }
+}
+
+/* Ajustes extra para teléfonos muy pequeños (ej. iPhone SE) */
+@media (max-width: 400px) {
+    .features-section, .quick-access-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        padding: 25px 20px;
+    }
+}

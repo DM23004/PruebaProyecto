@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Variables de Filtros y Paginación (Tabla)
     let currentPage = 1;
-    const itemsPerPage = 10;
+    const itemsPerPage = 15;
     const filterDate = document.getElementById('filter-date');
     const filterStatus = document.getElementById('filter-status');
     const btnPrevPage = document.getElementById('btn-prev-page');

@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Cargar el menú
     cargarSidebar();
 
-    // 2. Variables del DOM
+    // 2. Variables del DOM generales
     const tbody = document.getElementById('tasks-tbody');
     const modal = document.getElementById('task-modal');
     const taskForm = document.getElementById('task-form');
@@ -13,10 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Variables del Calendario
     const calendarDays = document.getElementById('calendar-days');
     const monthYearText = document.getElementById('calendar-month-year');
-    const monthPicker = document.getElementById('month-picker');
-    let navDate = new Date();
+    const monthPicker = document.getElementById('month-picker'); // Input oculto de mes
+    let navDate = new Date(); 
 
-    // Variables de Filtros y Paginación
+    // Variables de Filtros y Paginación (Tabla)
     let currentPage = 1;
     const itemsPerPage = 10;
     const filterDate = document.getElementById('filter-date');
@@ -35,8 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (monthPicker) {
         monthPicker.addEventListener('change', (e) => {
             if (e.target.value) {
-                const [y, m] = e.target.value.split('-');
-                navDate.setFullYear(parseInt(y), parseInt(m) - 1, 1);
+                const [year, month] = e.target.value.split('-');
+                // Ajustamos la fecha de navegación al mes seleccionado
+                navDate.setFullYear(parseInt(year), parseInt(month) - 1, 1);
                 renderCalendar();
             }
         });
@@ -58,14 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- FUNCIÓN PARA DIBUJAR EL CALENDARIO ---
     function renderCalendar() {
-        if (!calendarDays) return; 
+        if (!calendarDays) return; // Solo ejecutar si existe el calendario
 
         const year = navDate.getFullYear();
         const month = navDate.getMonth();
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         
-        // Actualizar título y sincronizar con el input oculto
+        // Actualizar título visual
         monthYearText.textContent = `${monthNames[month]} ${year}`;
+        
+        // Sincronizar el input oculto (month-picker) con el texto
         if (monthPicker) {
             const mesStr = (month + 1).toString().padStart(2, '0');
             monthPicker.value = `${year}-${mesStr}`;
@@ -73,10 +76,12 @@ document.addEventListener("DOMContentLoaded", () => {
         
         calendarDays.innerHTML = ''; 
 
+        // Cálculos del mes
         const firstDay = new Date(year, month, 1).getDay(); 
         const daysInMonth = new Date(year, month + 1, 0).getDate(); 
         const tareas = TaskManager.getTasks();
 
+        // 1. Cajas vacías antes del día 1
         for (let i = 0; i < firstDay; i++) {
             const emptyDiv = document.createElement('div');
             emptyDiv.className = 'calendar-day';
@@ -85,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
             calendarDays.appendChild(emptyDiv);
         }
 
+        // 2. Días reales
         for (let i = 1; i <= daysInMonth; i++) {
             const dayDiv = document.createElement('div');
             dayDiv.className = 'calendar-day';
@@ -118,19 +124,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Botones laterales del Calendario
     const btnPrev = document.getElementById('prev-month');
     const btnNext = document.getElementById('next-month');
     if (btnPrev) btnPrev.addEventListener('click', () => { navDate.setMonth(navDate.getMonth() - 1); renderCalendar(); });
     if (btnNext) btnNext.addEventListener('click', () => { navDate.setMonth(navDate.getMonth() + 1); renderCalendar(); });
 
 
-    // --- 4. FUNCIÓN CENTRAL DE RENDERIZADO (TABLA Y FILTROS) ---
+    // --- 4. RENDERIZAR TABLA, FILTROS Y PAGINACIÓN ---
     function renderApp() {
         let tareas = TaskManager.getTasks();
         if (metricsWorker) metricsWorker.postMessage(tareas);
 
         if (tbody) {
-            // Aplicar Filtros
+            // Aplicar Filtros primero
             if (filterStatus && filterStatus.value !== 'all') {
                 tareas = tareas.filter(t => t.estado === filterStatus.value);
             }
@@ -138,24 +145,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 tareas = tareas.filter(t => t.fecha === filterDate.value);
             }
 
-            // Paginación (10 registros)
+            // Calcular Paginación (10 registros)
             const totalPages = Math.ceil(tareas.length / itemsPerPage) || 1;
             if (currentPage > totalPages) currentPage = totalPages;
             
             const startIdx = (currentPage - 1) * itemsPerPage;
             const paginatedTasks = tareas.slice(startIdx, startIdx + itemsPerPage);
 
-            // Actualizar botones UI
+            // Actualizar botones de paginación visualmente
             if (pageInfo) pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
-            if (btnPrevPage) btnPrevPage.disabled = currentPage === 1;
-            if (btnPrevPage) btnPrevPage.style.opacity = currentPage === 1 ? '0.5' : '1';
-            if (btnNextPage) btnNextPage.disabled = currentPage === totalPages;
-            if (btnNextPage) btnNextPage.style.opacity = currentPage === totalPages ? '0.5' : '1';
+            if (btnPrevPage) {
+                btnPrevPage.disabled = currentPage === 1;
+                btnPrevPage.style.opacity = currentPage === 1 ? '0.5' : '1';
+                btnPrevPage.style.cursor = currentPage === 1 ? 'not-allowed' : 'pointer';
+            }
+            if (btnNextPage) {
+                btnNextPage.disabled = currentPage === totalPages;
+                btnNextPage.style.opacity = currentPage === totalPages ? '0.5' : '1';
+                btnNextPage.style.cursor = currentPage === totalPages ? 'not-allowed' : 'pointer';
+            }
 
-            // Dibujar Filas
+            // Dibujar las filas
             tbody.innerHTML = '';
             if (paginatedTasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-light);">No se encontraron tareas con estos filtros.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--text-light);">No se encontraron tareas.</td></tr>`;
             } else {
                 paginatedTasks.forEach(tarea => {
                     const statusClass = tarea.estado === 'pending' ? 'status-pending' : 'status-completed';
@@ -214,6 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Funciones globales (Ventanas Modales y CRUD)
     window.deleteTask = function(id) {
         if(confirm("¿Seguro que deseas eliminar esta tarea?")) {
             TaskManager.deleteTask(id);
@@ -236,3 +250,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderApp();
 });
+
+// Función para inyectar el HTML del panel lateral
+async function cargarSidebar() {
+    try {
+        const response = await fetch('./components/sidebar.html');
+        if (!response.ok) throw new Error(`No se pudo encontrar el archivo: ${response.status}`);
+        
+        const html = await response.text();
+        document.getElementById('sidebar-container').innerHTML = html;
+
+        // Resaltar la pestaña activa
+        const path = window.location.pathname;
+        if (path.includes('tareas.html')) document.getElementById('nav-tareas').parentElement.classList.add('active');
+        else if (path.includes('calendario.html')) document.getElementById('nav-calendario').parentElement.classList.add('active');
+        else if (path.includes('configuracion.html')) document.getElementById('nav-config').parentElement.classList.add('active');
+        else document.getElementById('nav-dashboard').parentElement.classList.add('active');
+    } catch (error) {
+        console.error('Error cargando el sidebar:', error);
+    }
+}

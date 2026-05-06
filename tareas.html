@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas - Mis Tareas</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar-container"></aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <h1>Mis Tareas</h1>
+                <p>Gestiona tu listado de actividades.</p>
+            </div>
+            <div class="user-info">
+                <span id="api-location"><i class="fas fa-map-marker-alt"></i> Obteniendo ubicación...</span>
+                <button class="btn-primary" id="btn-open-modal"><i class="fas fa-plus"></i> Nueva Tarea</button>
+            </div>
+        </header>
+
+        <section class="crud-container">
+            <div class="crud-header">
+                <h2>Listado de Tareas</h2>
+                <div class="crud-controls">
+                    <input type="text" id="search-input" placeholder="Buscar tarea...">
+                    <select id="filter-select">
+                        <option value="all">Todos los estados</option>
+                        <option value="pending">Pendientes</option>
+                        <option value="completed">Completadas</option>
+                    </select>
+                </div>
+            </div>
+            <table id="tasks-table">
+                <thead>
+                    <tr><th>ID</th><th>Título</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tasks-tbody"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/crud.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -3,29 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Tareas Personales - Dashboard</title>
+    <title>Gestor de Tareas - Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2><i class="fas fa-check-double"></i> TaskMaster</h2>
-        </div>
-        <ul class="sidebar-menu">
-            <li class="active"><a href="#"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-            <li><a href="#"><i class="fas fa-list-ul"></i> Mis Tareas</a></li>
-            <li><a href="#"><i class="fas fa-calendar-alt"></i> Calendario</a></li>
-            <li><a href="#"><i class="fas fa-cog"></i> Configuración</a></li>
-        </ul>
-    </aside>
+    <aside class="sidebar" id="sidebar-container"></aside>
 
     <main class="main-content">
         <header class="topbar">
             <div>
-                <h1>Gestión de Tareas Personales</h1>
-                <p>Bienvenido, revisa tus actividades de hoy.</p>
+                <h1>Panel de Control</h1>
+                <p>Bienvenido, revisa tus métricas de hoy.</p>
             </div>
             <div class="user-info">
                 <span id="api-location"><i class="fas fa-map-marker-alt"></i> Obteniendo ubicación...</span>
@@ -56,34 +46,6 @@
                 <i class="fas fa-clock" style="color: var(--warning);"></i>
             </div>
         </section>
-
-        <section class="crud-container">
-            <div class="crud-header">
-                <h2>Listado de Tareas</h2>
-                <div class="crud-controls">
-                    <input type="text" id="search-input" placeholder="Buscar tarea...">
-                    <select id="filter-select">
-                        <option value="all">Todos los estados</option>
-                        <option value="pending">Pendientes</option>
-                        <option value="completed">Completadas</option>
-                    </select>
-                </div>
-            </div>
-
-            <table id="tasks-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Título</th>
-                        <th>Descripción</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tasks-tbody">
-                    </tbody>
-            </table>
-        </section>
     </main>
 
     <div class="modal" id="task-modal">
@@ -91,24 +53,15 @@
             <h2 id="modal-title" style="margin-bottom: 20px;">Agregar Nueva Tarea</h2>
             <form id="task-form">
                 <input type="hidden" id="task-id">
+                <div class="form-group"><label>Título</label><input type="text" id="task-title" required></div>
+                <div class="form-group"><label>Descripción</label><textarea id="task-desc" rows="3" required></textarea></div>
                 <div class="form-group">
-                    <label for="task-title">Título</label>
-                    <input type="text" id="task-title" required placeholder="Ej. Estudiar JavaScript">
-                </div>
-                <div class="form-group">
-                    <label for="task-desc">Descripción</label>
-                    <textarea id="task-desc" rows="3" required placeholder="Detalles de la tarea..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="task-status">Estado</label>
-                    <select id="task-status">
-                        <option value="pending">Pendiente</option>
-                        <option value="completed">Completada</option>
-                    </select>
+                    <label>Estado</label>
+                    <select id="task-status"><option value="pending">Pendiente</option><option value="completed">Completada</option></select>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" id="btn-close-modal">Cancelar</button>
-                    <button type="submit" class="btn-primary">Guardar Tarea</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
                 </div>
             </form>
         </div>

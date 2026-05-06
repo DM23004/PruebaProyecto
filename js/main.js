@@ -114,7 +114,13 @@ document.addEventListener("DOMContentLoaded", () => {
 // Función para inyectar el HTML del panel lateral
 async function cargarSidebar() {
     try {
-        const response = await fetch('components/sidebar.html');
+        // MUY IMPORTANTE: Usar ./ para que GitHub encuentre la ruta
+        const response = await fetch('./components/sidebar.html');
+        
+        if (!response.ok) {
+            throw new Error(`No se pudo encontrar el archivo: ${response.status}`);
+        }
+        
         const html = await response.text();
         document.getElementById('sidebar-container').innerHTML = html;
 
@@ -132,5 +138,6 @@ async function cargarSidebar() {
         }
     } catch (error) {
         console.error('Error cargando el sidebar:', error);
+        document.getElementById('sidebar-container').innerHTML = '<h3 style="color:white; padding:20px;">Menú no encontrado</h3>';
     }
 }

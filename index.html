@@ -15,13 +15,18 @@
         <header class="topbar">
             <div>
                 <h1>Panel de Control</h1>
-                <p>Bienvenido, revisa tus métricas de hoy.</p>
+                <p id="current-date" style="color: var(--text-light); margin-top: 5px;"></p>
             </div>
             <div class="user-info">
                 <span id="api-location"><i class="fas fa-map-marker-alt"></i> Obteniendo ubicación...</span>
                 <button class="btn-primary" id="btn-open-modal"><i class="fas fa-plus"></i> Nueva Tarea</button>
             </div>
         </header>
+
+        <section class="welcome-hero">
+            <h1>Bienvenido a TaskMaster</h1>
+            <p>Tu aliado estratégico para la organización personal. Diseñado para ayudarte a alcanzar tus objetivos mediante una gestión de tareas fluida y métricas en tiempo real.</p>
+        </section>
 
         <section class="dashboard-cards">
             <div class="card">
@@ -45,6 +50,44 @@
                 </div>
                 <i class="fas fa-clock" style="color: var(--warning);"></i>
             </div>
+        </section>
+
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i> ¿Qué puedes hacer aquí?</h2>
+        <section class="features-section">
+            <div class="feature-item">
+                <i class="fas fa-magic"></i>
+                <h3>Gestión Inteligente</h3>
+                <p>Crea, edita y organiza tus actividades diarias con facilidad en la sección de Mis Tareas.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-bolt"></i>
+                <h3>Métricas al Instante</h3>
+                <p>Visualiza tu progreso sin interrupciones gracias a nuestro procesamiento con Web Workers en segundo plano.</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-cloud-sun"></i>
+                <h3>Contexto Local</h3>
+                <p>Nuestra API detecta tu ubicación automáticamente para que tu entorno esté siempre sincronizado.</p>
+            </div>
+        </section>
+
+        <h2 class="section-title"><i class="fas fa-rocket"></i> Accesos Directos</h2>
+        <section class="quick-access-grid">
+            <a href="tareas.html" class="action-card">
+                <i class="fas fa-list-check"></i>
+                <span>Mis Tareas</span>
+                <small>Ver y editar listado</small>
+            </a>
+            <a href="calendario.html" class="action-card">
+                <i class="fas fa-calendar-days"></i>
+                <span>Calendario</span>
+                <small>Planifica tu semana</small>
+            </a>
+            <a href="configuracion.html" class="action-card">
+                <i class="fas fa-user-gear"></i>
+                <span>Configuración</span>
+                <small>Ajustes de cuenta</small>
+            </a>
         </section>
     </main>
 
@@ -70,5 +113,9 @@
     <script src="js/api.js"></script>
     <script src="js/crud.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', opcionesFecha);
+    </script>
 </body>
 </html>

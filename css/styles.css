@@ -695,3 +695,45 @@ tbody tr:hover { background-color: #f8fafc; }
 
 .toast-info { border-left-color: var(--primary-color); }
 .toast-info i { color: var(--primary-color); font-size: 1.4rem; }
+
+/* =========================================
+   CONTROLES DE TABLA Y PAGINACIÓN
+   ========================================= */
+.date-filters { 
+    display: flex; 
+    gap: 10px; 
+    flex: 1; 
+    min-width: 250px;
+}
+
+.pagination-controls { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-top: 20px; 
+    padding: 10px 0; 
+    border-top: 1px solid #f1f5f9; 
+}
+
+.pagination-controls span { 
+    font-weight: 600; 
+    color: var(--text-dark); 
+}
+
+/* =========================================
+   ENCABEZADO ORDENABLE DE LA TABLA
+   ========================================= */
+.sortable-header { 
+    cursor: pointer; 
+    user-select: none; 
+    transition: color 0.2s ease; 
+}
+
+.sortable-header:hover { 
+    color: var(--primary-color); 
+}
+
+.sortable-header i {
+    margin-left: 5px;
+    font-size: 0.9em;
+}

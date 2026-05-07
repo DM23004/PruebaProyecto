@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const viewModal = document.getElementById('view-task-modal');
     const btnCloseView = document.getElementById('btn-close-view');
     const btnEditFromView = document.getElementById('btn-edit-from-view');
-    let currentViewTaskId = null; // Guardará el ID de la tarea que estamos viendo
+    let currentViewTaskId = null;
     
     // Variables del Calendario
     const calendarDays = document.getElementById('calendar-days');
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 taskDiv.onclick = (e) => {
                     e.stopPropagation(); 
-                    viewTask(tarea.id); // Llama a la vista en lugar de editar directamente
+                    viewTask(tarea.id);
                 };
                 
                 dayDiv.appendChild(taskDiv);
@@ -242,31 +242,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     const statusClass = tarea.estado === 'pending' ? 'status-pending' : 'status-completed';
                     const statusText = tarea.estado === 'pending' ? 'Pendiente' : 'Completada';
 
-                    const checkboxes = document.querySelectorAll('.task-checkbox');
-                    checkboxes.forEach(cb => {
-                        cb.addEventListener('change', (e) => {
-                            if (e.target.checked) selectedTaskIds.add(e.target.value);
-                            else selectedTaskIds.delete(e.target.value);
-                            updateDeleteButtonState();
-                        });
-                    });
-
-                    if(selectAllCheckbox) {
-                        selectAllCheckbox.checked = paginatedTasks.length > 0 && checkboxes.length === Array.from(checkboxes).filter(cb => cb.checked).length;
-                    }
-
                     const isChecked = selectedTaskIds.has(tarea.id) ? 'checked' : '';
                     const tr = document.createElement('tr');
                     
-                    // Condicionamos si la tabla tiene checkbox (para calendario vs tabla normal)
                     const checkboxCol = selectAllCheckbox ? `
                         <td style="text-align: center;">
                             <input type="checkbox" class="task-checkbox" value="${tarea.id}" ${isChecked}>
                         </td>` : '';
 
+                    // AQUÍ ESTÁ EL CAMBIO PARA EL ID COMPLETO: #${tarea.id} en vez de #${tarea.id.slice(-4)}
                     tr.innerHTML = `
                         ${checkboxCol}
-                        <td>#${tarea.id.slice(-4)}</td>
+                        <td>#${tarea.id}</td>
                         <td>${tarea.titulo}</td>
                         <td>${tarea.descripcion}</td>
                         <td><strong>${tarea.fecha || 'Sin fecha'}</strong></td>
@@ -279,10 +266,37 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                     tbody.appendChild(tr);
                 });
+
+                // --- NUEVA LÓGICA DE CHECKBOXES PARA EVITAR BUGS ---
+                const checkboxes = document.querySelectorAll('.task-checkbox');
+                
+                // 1. Al hacer clic en un checkbox individual
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', (e) => {
+                        if (e.target.checked) selectedTaskIds.add(e.target.value);
+                        else selectedTaskIds.delete(e.target.value);
+                        
+                        updateDeleteButtonState();
+                        updateSelectAllCheckboxState(checkboxes); // Validar si el maestro debe marcarse/desmarcarse
+                    });
+                });
+
+                // 2. Validar el estado del maestro al cargar la página (por si cambias de pág y vuelves)
+                updateSelectAllCheckboxState(checkboxes);
             }
         }
 
         renderCalendar();
+    }
+
+    // Función auxiliar para actualizar el Checkbox Maestro dependiendo de los individuales
+    function updateSelectAllCheckboxState(checkboxes) {
+        if (selectAllCheckbox && checkboxes.length > 0) {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            selectAllCheckbox.checked = allChecked;
+        } else if (selectAllCheckbox) {
+            selectAllCheckbox.checked = false;
+        }
     }
 
     // 5. Eventos de los Modales (Crear/Editar)
@@ -340,6 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Acción del Checkbox Maestro (Selecciona/Deselecciona SOLO los de la página visible)
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', (e) => {
             const checkboxes = document.querySelectorAll('.task-checkbox');
@@ -390,6 +405,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (idsToDelete.length > 0) {
                 TaskManager.deleteMultipleTasks(idsToDelete);
                 
+                // Eliminamos los ids borrados de nuestro Set de selección actual
                 idsToDelete.forEach(id => selectedTaskIds.delete(id));
                 updateDeleteButtonState();
                 
@@ -406,7 +422,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // LÓGICA DEL MODAL DE VISUALIZACIÓN DE TAREA
     // ==========================================
     
-    // Función para abrir la visualización de la tarea
     window.viewTask = function(id) {
         const tarea = TaskManager.getTasks().find(t => t.id == id);
         if(tarea && viewModal) {
@@ -425,7 +440,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Cerrar el modal de visualización
     if(btnCloseView) {
         btnCloseView.addEventListener('click', () => {
             viewModal.style.display = "none";
@@ -433,7 +447,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Botón de "Editar Tarea" dentro de la visualización
     if(btnEditFromView) {
         btnEditFromView.addEventListener('click', () => {
             viewModal.style.display = "none"; 
@@ -441,7 +454,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Función para Editar Tarea
     window.editTask = function(id) {
         const tarea = TaskManager.getTasks().find(t => t.id == id);
         if(tarea) {

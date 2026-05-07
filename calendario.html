@@ -50,7 +50,12 @@
             <div class="crud-header">
                 <h3 class="section-title" style="margin:0;"><i class="fas fa-list-check"></i> Detalle de Tareas</h3>
                 <div class="crud-controls">
-                    <input type="date" id="filter-date" title="Filtrar por Fecha">
+                    <!-- Buscador general (ID y Título) -->
+                    <input type="text" id="search-input" placeholder="Buscar por ID o Título...">
+
+                    <input type="date" id="filter-date-start" title="Desde la fecha...">
+                    <input type="date" id="filter-date-end" title="Hasta la fecha...">
+                    
                     <select id="filter-status" title="Filtrar por Estado">
                         <option value="all">Todas las tareas</option>
                         <option value="pending">Solo Pendientes</option>
@@ -63,7 +68,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th><th>Título</th><th>Descripción</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
+                            <th>ID</th><th>Título</th><th>Descripción</th>
+                            <th id="th-fecha" class="sortable-header" title="Clic para ordenar">
+                                Fecha <i id="sort-icon" class="fas fa-sort-down"></i>
+                            </th>
+                            <th>Estado</th><th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tasks-tbody"></tbody>

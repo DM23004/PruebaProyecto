@@ -53,5 +53,14 @@ const TaskManager = {
         tareas = tareas.filter(t => t.id != id);
         this.saveTasks(tareas);
         return tareas;
+    }, // <-- Importante: esta coma separa las funciones
+
+    // Eliminar Múltiples Tareas (NUEVO)
+    deleteMultipleTasks: function(idsArray) {
+        let tareas = this.getTasks();
+        // Filtramos dejando solo las tareas cuyo ID NO esté en el arreglo de IDs a borrar
+        tareas = tareas.filter(t => !idsArray.includes(t.id));
+        this.saveTasks(tareas);
+        return tareas;
     }
 };

@@ -8,7 +8,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskForm = document.getElementById('task-form');
     const btnOpenModal = document.getElementById('btn-open-modal');
     const btnCloseModal = document.getElementById('btn-close-modal');
+    const btnDeleteSelected = document.getElementById('btn-delete-selected');
+    const selectAllCheckbox = document.getElementById('select-all-tasks');
+    let selectedTaskIds = new Set(); // Guardará los IDs seleccionados
     const modalTitle = document.getElementById('modal-title');
+
+    // Variables del Modal de Visualización
+    const viewModal = document.getElementById('view-task-modal');
+    const btnCloseView = document.getElementById('btn-close-view');
+    const btnEditFromView = document.getElementById('btn-edit-from-view');
+    let currentViewTaskId = null; // Guardará el ID de la tarea que estamos viendo
     
     // Variables del Calendario
     const calendarDays = document.getElementById('calendar-days');
@@ -59,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Quitar después de 3 segundos
         setTimeout(() => {
             toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 400); // Esperar a que termine la transición CSS
+            setTimeout(() => toast.remove(), 400); 
         }, 3000);
     };
 
@@ -161,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 taskDiv.onclick = (e) => {
                     e.stopPropagation(); 
-                    editTask(tarea.id);
+                    viewTask(tarea.id); // Llama a la vista en lugar de editar directamente
                 };
                 
                 dayDiv.appendChild(taskDiv);
@@ -227,22 +236,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tbody.innerHTML = '';
             if (paginatedTasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--text-light);">No se encontraron tareas con estos filtros.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color: var(--text-light);">No se encontraron tareas con estos filtros.</td></tr>`;
             } else {
                 paginatedTasks.forEach(tarea => {
                     const statusClass = tarea.estado === 'pending' ? 'status-pending' : 'status-completed';
                     const statusText = tarea.estado === 'pending' ? 'Pendiente' : 'Completada';
 
+                    const checkboxes = document.querySelectorAll('.task-checkbox');
+                    checkboxes.forEach(cb => {
+                        cb.addEventListener('change', (e) => {
+                            if (e.target.checked) selectedTaskIds.add(e.target.value);
+                            else selectedTaskIds.delete(e.target.value);
+                            updateDeleteButtonState();
+                        });
+                    });
+
+                    if(selectAllCheckbox) {
+                        selectAllCheckbox.checked = paginatedTasks.length > 0 && checkboxes.length === Array.from(checkboxes).filter(cb => cb.checked).length;
+                    }
+
+                    const isChecked = selectedTaskIds.has(tarea.id) ? 'checked' : '';
                     const tr = document.createElement('tr');
+                    
+                    // Condicionamos si la tabla tiene checkbox (para calendario vs tabla normal)
+                    const checkboxCol = selectAllCheckbox ? `
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="task-checkbox" value="${tarea.id}" ${isChecked}>
+                        </td>` : '';
+
                     tr.innerHTML = `
+                        ${checkboxCol}
                         <td>#${tarea.id.slice(-4)}</td>
                         <td>${tarea.titulo}</td>
                         <td>${tarea.descripcion}</td>
                         <td><strong>${tarea.fecha || 'Sin fecha'}</strong></td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td class="action-btns">
-                            <button class="btn-edit" onclick="editTask('${tarea.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn-delete" onclick="deleteTask('${tarea.id}')"><i class="fas fa-trash-alt"></i></button>
+                            <button class="btn-view" onclick="viewTask('${tarea.id}')" style="color: var(--primary-color);" title="Ver"><i class="fas fa-eye"></i></button>
+                            <button class="btn-edit" onclick="editTask('${tarea.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button class="btn-delete" onclick="deleteSingleTask('${tarea.id}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -253,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderCalendar();
     }
 
-    // 5. Eventos del Modal
+    // 5. Eventos de los Modales (Crear/Editar)
     if(btnOpenModal) {
         btnOpenModal.addEventListener('click', () => {
             taskForm.reset();
@@ -274,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             
             const existingId = document.getElementById('task-id').value;
-            const isEditing = !!existingId; // Será true si estamos editando
+            const isEditing = !!existingId; 
             
             const newTask = {
                 id: existingId || Date.now().toString(),
@@ -288,7 +320,6 @@ document.addEventListener("DOMContentLoaded", () => {
             modal.style.display = "none";
             renderApp(); 
             
-            // Disparar la notificación adecuada
             if (isEditing) {
                 showToast("Tarea actualizada correctamente.", "info");
             } else {
@@ -297,44 +328,120 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Funciones globales (Ventanas Modales y CRUD)
+    // Función para mostrar/ocultar el botón de borrado masivo
+    function updateDeleteButtonState() {
+        if (btnDeleteSelected) {
+            if (selectedTaskIds.size > 0) {
+                btnDeleteSelected.style.display = 'inline-flex';
+                btnDeleteSelected.innerHTML = `<i class="fas fa-trash-alt"></i> Eliminar (${selectedTaskIds.size})`;
+            } else {
+                btnDeleteSelected.style.display = 'none';
+            }
+        }
+    }
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.task-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = e.target.checked;
+                if (e.target.checked) selectedTaskIds.add(cb.value);
+                else selectedTaskIds.delete(cb.value);
+            });
+            updateDeleteButtonState();
+        });
+    }
+
     // ==========================================
     // LÓGICA DEL MODAL DE ELIMINACIÓN CUSTOM
     // ==========================================
-    let taskToDeleteId = null; // Variable para guardar el ID temporalmente
+    let idsToDelete = []; 
     const deleteModal = document.getElementById('delete-confirm-modal');
+    const deleteModalTitle = document.getElementById('delete-modal-title');
+    const deleteModalText = document.getElementById('delete-modal-text');
     const btnCancelDelete = document.getElementById('btn-cancel-delete');
     const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
-    // Al hacer clic en el botón del basurero en la tabla
-    window.deleteTask = function(id) {
-        taskToDeleteId = id; // Guardamos el ID de la tarea a borrar
-        if(deleteModal) {
-            deleteModal.style.display = 'flex'; // Mostramos nuestro modal custom
-        }
+    window.deleteSingleTask = function(id) {
+        idsToDelete = [id];
+        if(deleteModalTitle) deleteModalTitle.textContent = "¿Eliminar Tarea?";
+        if(deleteModalText) deleteModalText.textContent = "Esta acción es permanente. ¿Estás seguro?";
+        if(deleteModal) deleteModal.style.display = 'flex';
     };
 
-    // Al hacer clic en "Cancelar" en el modal de eliminación
+    if (btnDeleteSelected) {
+        btnDeleteSelected.addEventListener('click', () => {
+            idsToDelete = Array.from(selectedTaskIds);
+            if(deleteModalTitle) deleteModalTitle.textContent = `¿Eliminar ${idsToDelete.length} Tareas?`;
+            if(deleteModalText) deleteModalText.textContent = `Vas a eliminar permanentemente ${idsToDelete.length} tareas. ¿Estás seguro?`;
+            if(deleteModal) deleteModal.style.display = 'flex';
+        });
+    }
+
     if (btnCancelDelete) {
         btnCancelDelete.addEventListener('click', () => {
             if(deleteModal) deleteModal.style.display = 'none';
-            taskToDeleteId = null; // Limpiamos el ID
+            idsToDelete = [];
         });
     }
 
-    // Al hacer clic en "Sí, Eliminar"
     if (btnConfirmDelete) {
         btnConfirmDelete.addEventListener('click', () => {
-            if (taskToDeleteId) {
-                TaskManager.deleteTask(taskToDeleteId); // Borramos de LocalStorage
-                renderApp(); // Recargamos la tabla
-                showToast("La tarea ha sido eliminada.", "danger"); // Mostramos notificación
+            if (idsToDelete.length > 0) {
+                TaskManager.deleteMultipleTasks(idsToDelete);
+                
+                idsToDelete.forEach(id => selectedTaskIds.delete(id));
+                updateDeleteButtonState();
+                
+                renderApp(); 
+                showToast(idsToDelete.length > 1 ? `${idsToDelete.length} tareas eliminadas.` : "La tarea ha sido eliminada.", "danger");
             }
-            if(deleteModal) deleteModal.style.display = 'none'; // Escondemos el modal
-            taskToDeleteId = null; // Limpiamos el ID
+            if(deleteModal) deleteModal.style.display = 'none';
+            idsToDelete = [];
+            if(selectAllCheckbox) selectAllCheckbox.checked = false;
         });
     }
 
+    // ==========================================
+    // LÓGICA DEL MODAL DE VISUALIZACIÓN DE TAREA
+    // ==========================================
+    
+    // Función para abrir la visualización de la tarea
+    window.viewTask = function(id) {
+        const tarea = TaskManager.getTasks().find(t => t.id == id);
+        if(tarea && viewModal) {
+            currentViewTaskId = tarea.id;
+            
+            document.getElementById('view-task-title').textContent = tarea.titulo;
+            document.getElementById('view-task-id').textContent = `#${tarea.id}`;
+            document.getElementById('view-task-date').textContent = tarea.fecha || 'Sin fecha asignada';
+            document.getElementById('view-task-desc').textContent = tarea.descripcion || 'Sin descripción...';
+            
+            const statusEl = document.getElementById('view-task-status');
+            statusEl.textContent = tarea.estado === 'pending' ? 'Pendiente' : 'Completada';
+            statusEl.className = `status-badge ${tarea.estado === 'pending' ? 'status-pending' : 'status-completed'}`;
+            
+            viewModal.style.display = "flex";
+        }
+    };
+
+    // Cerrar el modal de visualización
+    if(btnCloseView) {
+        btnCloseView.addEventListener('click', () => {
+            viewModal.style.display = "none";
+            currentViewTaskId = null;
+        });
+    }
+
+    // Botón de "Editar Tarea" dentro de la visualización
+    if(btnEditFromView) {
+        btnEditFromView.addEventListener('click', () => {
+            viewModal.style.display = "none"; 
+            editTask(currentViewTaskId); 
+        });
+    }
+
+    // Función para Editar Tarea
     window.editTask = function(id) {
         const tarea = TaskManager.getTasks().find(t => t.id == id);
         if(tarea) {
@@ -343,8 +450,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('task-desc').value = tarea.descripcion;
             document.getElementById('task-date').value = tarea.fecha || ''; 
             document.getElementById('task-status').value = tarea.estado;
-            modalTitle.textContent = "Editar Tarea";
-            modal.style.display = "flex";
+            if(modalTitle) modalTitle.textContent = "Editar Tarea";
+            if(modal) modal.style.display = "flex";
         }
     };
 
@@ -360,7 +467,6 @@ async function cargarSidebar() {
         const html = await response.text();
         document.getElementById('sidebar-container').innerHTML = html;
 
-        // Resaltar la pestaña activa
         const path = window.location.pathname;
         if (path.includes('tareas.html')) document.getElementById('nav-tareas').parentElement.classList.add('active');
         else if (path.includes('calendario.html')) document.getElementById('nav-calendario').parentElement.classList.add('active');

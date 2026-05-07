@@ -6,6 +6,20 @@
     <title>Gestor de Tareas - Calendario</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
+    <style>
+        .sortable-header { 
+            cursor: pointer; 
+            user-select: none; 
+            transition: color 0.2s ease; 
+        }
+        .sortable-header:hover { 
+            color: var(--primary-color); 
+        }
+        .sortable-header i {
+            margin-left: 5px;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
 
@@ -50,7 +64,6 @@
             <div class="crud-header">
                 <h3 class="section-title" style="margin:0;"><i class="fas fa-list-check"></i> Detalle de Tareas</h3>
                 <div class="crud-controls">
-                    <!-- Buscador general (ID y Título) -->
                     <input type="text" id="search-input" placeholder="Buscar por ID o Título...">
 
                     <input type="date" id="filter-date-start" title="Desde la fecha...">
@@ -112,11 +125,35 @@
             <div style="font-size: 3rem; color: var(--danger); margin-bottom: 15px;">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <h2 style="margin-bottom: 10px;">¿Eliminar Tarea?</h2>
-            <p style="color: var(--text-light); margin-bottom: 25px;">Esta acción es permanente y no se puede deshacer. ¿Estás seguro?</p>
+            <h2 id="delete-modal-title" style="margin-bottom: 10px;">¿Eliminar Tarea?</h2>
+            <p id="delete-modal-text" style="color: var(--text-light); margin-bottom: 25px;">Esta acción es permanente y no se puede deshacer. ¿Estás seguro?</p>
             <div class="modal-actions" style="justify-content: center; width: 100%;">
                 <button type="button" class="btn-cancel" id="btn-cancel-delete">Cancelar</button>
                 <button type="button" class="btn-primary" id="btn-confirm-delete" style="background-color: var(--danger); box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);">Sí, Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="view-task-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 15px;">
+                <h2 id="view-task-title" style="word-break: break-word; color: var(--primary-color); margin: 0;">Título de la tarea</h2>
+                <span id="view-task-status" class="status-badge" style="white-space: nowrap;">Estado</span>
+            </div>
+            
+            <div style="margin-bottom: 15px; color: var(--text-light); font-size: 0.95rem;">
+                <p><strong><i class="fas fa-fingerprint"></i> ID:</strong> <span id="view-task-id"></span></p>
+                <p style="margin-top: 8px;"><strong><i class="fas fa-calendar-alt"></i> Fecha planificada:</strong> <span id="view-task-date"></span></p>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <p style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 8px;"><strong><i class="fas fa-align-left"></i> Descripción:</strong></p>
+                <div id="view-task-desc" style="background: var(--bg-color); padding: 15px; border-radius: 8px; color: var(--text-dark); white-space: pre-wrap; font-size: 0.95rem; line-height: 1.5; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+            
+            <div class="modal-actions" style="justify-content: flex-end;">
+                <button type="button" class="btn-cancel" id="btn-close-view">Cerrar</button>
+                <button type="button" class="btn-primary" id="btn-edit-from-view"><i class="fas fa-edit"></i> Editar Tarea</button>
             </div>
         </div>
     </div>

@@ -13,30 +13,82 @@ document.addEventListener("DOMContentLoaded", () => {
     // Variables del Calendario
     const calendarDays = document.getElementById('calendar-days');
     const monthYearText = document.getElementById('calendar-month-year');
-    const monthPicker = document.getElementById('month-picker'); // Input oculto de mes
+    const monthPicker = document.getElementById('month-picker'); 
     let navDate = new Date(); 
 
-    // Variables de Filtros y Paginación (Tabla)
+    // Variables de Filtros, Búsqueda, Ordenamiento y Paginación
     let currentPage = 1;
-    const itemsPerPage = 15;
-    const filterDate = document.getElementById('filter-date');
-    const filterStatus = document.getElementById('filter-status');
+    const itemsPerPage = 15; 
+    let dateSortOrder = 'desc'; // Por defecto, orden descendente
+
+    const searchInput = document.getElementById('search-input');
+    const filterStatus = document.getElementById('filter-select') || document.getElementById('filter-status');
+    const filterDateStart = document.getElementById('filter-date-start');
+    const filterDateEnd = document.getElementById('filter-date-end');
+    const filterDateSingle = document.getElementById('filter-date');
+    
+    const thFecha = document.getElementById('th-fecha');
+    const sortIcon = document.getElementById('sort-icon');
+    
     const btnPrevPage = document.getElementById('btn-prev-page');
     const btnNextPage = document.getElementById('btn-next-page');
     const pageInfo = document.getElementById('page-info');
 
-    // Escuchadores de Filtros y Paginación
-    if (filterDate) filterDate.addEventListener('change', () => { currentPage = 1; renderApp(); });
+    // === SISTEMA DE NOTIFICACIONES (TOASTS) ===
+    window.showToast = function(message, type = 'success') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        
+        const icon = type === 'success' ? '<i class="fas fa-check-circle"></i>' : 
+                     type === 'danger' ? '<i class="fas fa-trash-alt"></i>' : 
+                     '<i class="fas fa-info-circle"></i>';
+                     
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        container.appendChild(toast);
+        
+        // Animar entrada
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Quitar después de 3 segundos
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400); // Esperar a que termine la transición CSS
+        }, 3000);
+    };
+
+    // Escuchadores de Búsqueda, Filtros y Paginación
+    if (searchInput) searchInput.addEventListener('input', () => { currentPage = 1; renderApp(); });
     if (filterStatus) filterStatus.addEventListener('change', () => { currentPage = 1; renderApp(); });
+    if (filterDateStart) filterDateStart.addEventListener('change', () => { currentPage = 1; renderApp(); });
+    if (filterDateEnd) filterDateEnd.addEventListener('change', () => { currentPage = 1; renderApp(); });
+    if (filterDateSingle) filterDateSingle.addEventListener('change', () => { currentPage = 1; renderApp(); });
+    
+    // Escuchador para hacer clic en el encabezado de Fecha
+    if (thFecha) {
+        thFecha.addEventListener('click', () => {
+            dateSortOrder = dateSortOrder === 'desc' ? 'asc' : 'desc';
+            if (dateSortOrder === 'asc') sortIcon.className = 'fas fa-sort-up';
+            else sortIcon.className = 'fas fa-sort-down';
+            
+            currentPage = 1;
+            renderApp();
+        });
+    }
+    
     if (btnPrevPage) btnPrevPage.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderApp(); } });
     if (btnNextPage) btnNextPage.addEventListener('click', () => { currentPage++; renderApp(); });
 
-    // Escuchador del Selector de Mes (Centro del Calendario)
     if (monthPicker) {
         monthPicker.addEventListener('change', (e) => {
             if (e.target.value) {
                 const [year, month] = e.target.value.split('-');
-                // Ajustamos la fecha de navegación al mes seleccionado
                 navDate.setFullYear(parseInt(year), parseInt(month) - 1, 1);
                 renderCalendar();
             }
@@ -59,16 +111,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- FUNCIÓN PARA DIBUJAR EL CALENDARIO ---
     function renderCalendar() {
-        if (!calendarDays) return; // Solo ejecutar si existe el calendario
+        if (!calendarDays) return; 
 
         const year = navDate.getFullYear();
         const month = navDate.getMonth();
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         
-        // Actualizar título visual
         monthYearText.textContent = `${monthNames[month]} ${year}`;
         
-        // Sincronizar el input oculto (month-picker) con el texto
         if (monthPicker) {
             const mesStr = (month + 1).toString().padStart(2, '0');
             monthPicker.value = `${year}-${mesStr}`;
@@ -76,12 +126,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         calendarDays.innerHTML = ''; 
 
-        // Cálculos del mes
         const firstDay = new Date(year, month, 1).getDay(); 
         const daysInMonth = new Date(year, month + 1, 0).getDate(); 
         const tareas = TaskManager.getTasks();
 
-        // 1. Cajas vacías antes del día 1
         for (let i = 0; i < firstDay; i++) {
             const emptyDiv = document.createElement('div');
             emptyDiv.className = 'calendar-day';
@@ -90,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
             calendarDays.appendChild(emptyDiv);
         }
 
-        // 2. Días reales
         for (let i = 1; i <= daysInMonth; i++) {
             const dayDiv = document.createElement('div');
             dayDiv.className = 'calendar-day';
@@ -124,35 +171,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Botones laterales del Calendario
     const btnPrev = document.getElementById('prev-month');
     const btnNext = document.getElementById('next-month');
     if (btnPrev) btnPrev.addEventListener('click', () => { navDate.setMonth(navDate.getMonth() - 1); renderCalendar(); });
     if (btnNext) btnNext.addEventListener('click', () => { navDate.setMonth(navDate.getMonth() + 1); renderCalendar(); });
 
 
-    // --- 4. RENDERIZAR TABLA, FILTROS Y PAGINACIÓN ---
+    // --- 4. RENDERIZAR TABLA, FILTROS, ORDENAMIENTO Y PAGINACIÓN ---
     function renderApp() {
         let tareas = TaskManager.getTasks();
         if (metricsWorker) metricsWorker.postMessage(tareas);
 
         if (tbody) {
-            // Aplicar Filtros primero
+            if (searchInput && searchInput.value.trim() !== '') {
+                const term = searchInput.value.toLowerCase().trim();
+                tareas = tareas.filter(t => 
+                    (t.titulo && t.titulo.toLowerCase().includes(term)) ||
+                    (t.id && t.id.toString().toLowerCase().includes(term))
+                );
+            }
+
             if (filterStatus && filterStatus.value !== 'all') {
                 tareas = tareas.filter(t => t.estado === filterStatus.value);
             }
-            if (filterDate && filterDate.value) {
-                tareas = tareas.filter(t => t.fecha === filterDate.value);
-            }
 
-            // Calcular Paginación (10 registros)
+            if (filterDateStart && filterDateStart.value) tareas = tareas.filter(t => t.fecha >= filterDateStart.value);
+            if (filterDateEnd && filterDateEnd.value) tareas = tareas.filter(t => t.fecha <= filterDateEnd.value);
+            if (filterDateSingle && filterDateSingle.value) tareas = tareas.filter(t => t.fecha === filterDateSingle.value);
+
+            // Ordenamiento por Fecha dinámico
+            tareas.sort((a, b) => {
+                const dateA = a.fecha || '';
+                const dateB = b.fecha || '';
+                if (dateSortOrder === 'asc') return dateA.localeCompare(dateB); 
+                return dateB.localeCompare(dateA); 
+            });
+
             const totalPages = Math.ceil(tareas.length / itemsPerPage) || 1;
             if (currentPage > totalPages) currentPage = totalPages;
             
             const startIdx = (currentPage - 1) * itemsPerPage;
             const paginatedTasks = tareas.slice(startIdx, startIdx + itemsPerPage);
 
-            // Actualizar botones de paginación visualmente
             if (pageInfo) pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
             if (btnPrevPage) {
                 btnPrevPage.disabled = currentPage === 1;
@@ -165,10 +225,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnNextPage.style.cursor = currentPage === totalPages ? 'not-allowed' : 'pointer';
             }
 
-            // Dibujar las filas
             tbody.innerHTML = '';
             if (paginatedTasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--text-light);">No se encontraron tareas.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--text-light);">No se encontraron tareas con estos filtros.</td></tr>`;
             } else {
                 paginatedTasks.forEach(tarea => {
                     const statusClass = tarea.estado === 'pending' ? 'status-pending' : 'status-completed';
@@ -213,27 +272,68 @@ document.addEventListener("DOMContentLoaded", () => {
     if(taskForm) {
         taskForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            const existingId = document.getElementById('task-id').value;
+            const isEditing = !!existingId; // Será true si estamos editando
+            
             const newTask = {
-                id: document.getElementById('task-id').value,
+                id: existingId || Date.now().toString(),
                 titulo: document.getElementById('task-title').value,
                 descripcion: document.getElementById('task-desc').value,
                 fecha: document.getElementById('task-date').value, 
                 estado: document.getElementById('task-status').value
             };
+            
             TaskManager.saveTask(newTask);
             modal.style.display = "none";
             renderApp(); 
-            if(!tbody && !calendarDays) alert("Tarea guardada exitosamente.");
+            
+            // Disparar la notificación adecuada
+            if (isEditing) {
+                showToast("Tarea actualizada correctamente.", "info");
+            } else {
+                showToast("Nueva tarea creada exitosamente.", "success");
+            }
         });
     }
 
     // Funciones globales (Ventanas Modales y CRUD)
+    // ==========================================
+    // LÓGICA DEL MODAL DE ELIMINACIÓN CUSTOM
+    // ==========================================
+    let taskToDeleteId = null; // Variable para guardar el ID temporalmente
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    const btnCancelDelete = document.getElementById('btn-cancel-delete');
+    const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+
+    // Al hacer clic en el botón del basurero en la tabla
     window.deleteTask = function(id) {
-        if(confirm("¿Seguro que deseas eliminar esta tarea?")) {
-            TaskManager.deleteTask(id);
-            renderApp();
+        taskToDeleteId = id; // Guardamos el ID de la tarea a borrar
+        if(deleteModal) {
+            deleteModal.style.display = 'flex'; // Mostramos nuestro modal custom
         }
     };
+
+    // Al hacer clic en "Cancelar" en el modal de eliminación
+    if (btnCancelDelete) {
+        btnCancelDelete.addEventListener('click', () => {
+            if(deleteModal) deleteModal.style.display = 'none';
+            taskToDeleteId = null; // Limpiamos el ID
+        });
+    }
+
+    // Al hacer clic en "Sí, Eliminar"
+    if (btnConfirmDelete) {
+        btnConfirmDelete.addEventListener('click', () => {
+            if (taskToDeleteId) {
+                TaskManager.deleteTask(taskToDeleteId); // Borramos de LocalStorage
+                renderApp(); // Recargamos la tabla
+                showToast("La tarea ha sido eliminada.", "danger"); // Mostramos notificación
+            }
+            if(deleteModal) deleteModal.style.display = 'none'; // Escondemos el modal
+            taskToDeleteId = null; // Limpiamos el ID
+        });
+    }
 
     window.editTask = function(id) {
         const tarea = TaskManager.getTasks().find(t => t.id == id);

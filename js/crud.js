@@ -1,5 +1,3 @@
-// js/crud.js
-
 // Funciones para manejar LocalStorage
 const TaskManager = {
     // Clave para guardar en LocalStorage
@@ -31,13 +29,16 @@ const TaskManager = {
         const tareas = this.getTasks();
         
         if (task.id) {
-            // Actualizar existente
             const index = tareas.findIndex(t => t.id == task.id);
             if (index !== -1) {
+                // Actualizar existente
                 tareas[index] = task;
+            } else {
+                // ¡AQUÍ ESTABA EL ERROR! Si trae ID pero no está en el array, es nueva.
+                tareas.push(task);
             }
         } else {
-            // Crear nueva (Generar ID simple usando timestamp)
+            // Por si acaso llega sin ID
             task.id = Date.now().toString();
             tareas.push(task);
         }
